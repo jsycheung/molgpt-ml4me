@@ -207,6 +207,8 @@ if __name__ == '__main__':
             sca = None
             y = sample(model, x, args.block_size, temperature=1, sample=True,
                        top_k=None, prop=p, scaffold=sca)   # 0.7 for guacamol
+            # Jasmine: print y to debug
+            print(y)
             for gen_mol in y:
                 completion = ''.join([itos[int(i)] for i in gen_mol])
                 completion = completion.replace('<', '')
