@@ -134,7 +134,7 @@ if __name__ == '__main__':
     model = GPT(mconf)
 
     # Jasmine: change load path, for guacamol del prop_nn weights and bias if we don't have prop_condition and scaf_condition
-    if prop_condition is None and scaf_condition is None and 'guacamol' in args.data_name:
+    if args.prop is None and args.scaffold is None and 'guacamol' in args.data_name:
         pretrained_weights = torch.load('./weights/' + args.model_weight)
         del pretrained_weights["prop_nn.weight"]
         del pretrained_weights["prop_nn.bias"]
