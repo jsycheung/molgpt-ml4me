@@ -208,8 +208,14 @@ if __name__ == '__main__':
             y = sample(model, x, args.block_size, temperature=1, sample=True,
                        top_k=None, prop=p, scaffold=sca)   # 0.7 for guacamol
             # Jasmine: print y to debug
-            print(y)
             for gen_mol in y:
+                # itos_list = []
+                # for i in gen_mol:
+                #     if int(i) > 92:
+                #         itos_list += itos[92]
+                #     else:
+                #         itos_list += itos[int(i)]
+                print(gen_mol)
                 completion = ''.join([itos[int(i)] for i in gen_mol])
                 completion = completion.replace('<', '')
                 # gen_smiles.append(completion)
