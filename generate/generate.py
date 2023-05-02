@@ -133,9 +133,9 @@ if __name__ == '__main__':
                       lstm=args.lstm, lstm_layers=args.lstm_layers)
     model = GPT(mconf)
 
-    # Jasmine: change load path
+    # Jasmine: change load path, add strict=False
     model.load_state_dict(torch.load(
-        './weights/' + args.model_weight))
+        './weights/' + args.model_weight, strict=False))
     model.to('cuda')
     print('Model loaded')
 
@@ -303,8 +303,8 @@ if __name__ == '__main__':
 
             # with open(f'gen_csv/moses_metrics_7_top10.json', 'w') as file:
             #       json.dump(metrics, file)
-
-            canon_smiles = [canonic_smiles(s) for s in results['smiles']]
+            # remove canonic_smiles
+            canon_smiles = [s for s in results['smiles']]
             unique_smiles = list(set(canon_smiles))
             if 'moses' in args.data_name:
                 # replace 'source' with 'split' for moses
@@ -381,7 +381,8 @@ if __name__ == '__main__':
             # with open(f'gen_csv/moses_metrics_7_top10.json', 'w') as file:
             #       json.dump(metrics, file)
 
-            canon_smiles = [canonic_smiles(s) for s in results['smiles']]
+            # remove canonic_smiles
+            canon_smiles = [s for s in results['smiles']]
             unique_smiles = list(set(canon_smiles))
             if 'moses' in args.data_name:
                 # replace 'source' with 'split' for moses
@@ -460,7 +461,8 @@ if __name__ == '__main__':
                 # with open(f'gen_csv/moses_metrics_7_top10.json', 'w') as file:
                 #       json.dump(metrics, file)
 
-                canon_smiles = [canonic_smiles(s) for s in results['smiles']]
+                # remove canonic_smiles
+                canon_smiles = [s for s in results['smiles']]
                 unique_smiles = list(set(canon_smiles))
                 if 'moses' in args.data_name:
                     # replace 'source' with 'split' for moses
@@ -507,7 +509,8 @@ if __name__ == '__main__':
     results.to_csv('gen_csv_again/' + args.csv_name + '.csv', index=False)
 
     unique_smiles = list(set(results['smiles']))
-    canon_smiles = [canonic_smiles(s) for s in results['smiles']]
+    # remove canonic_smiles
+    canon_smiles = [s for s in results['smiles']]
     unique_smiles = list(set(canon_smiles))
     if 'moses' in args.data_name:
         # replace 'source' with 'split' for moses
