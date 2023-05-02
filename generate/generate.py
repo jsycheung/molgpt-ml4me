@@ -17,7 +17,6 @@ import seaborn as sns
 # Jasmine: don't need get_mol because Chem.MolToSmiles will generate canonical smies anyway
 # from moses.utils import get_mol
 import re
-import moses
 import json
 from rdkit.Chem import RDConfig
 import os
