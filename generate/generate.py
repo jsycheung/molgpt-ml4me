@@ -209,15 +209,12 @@ if __name__ == '__main__':
                        top_k=None, prop=p, scaffold=sca)   # 0.7 for guacamol
             # Jasmine: print y to debug
             for gen_mol in y:
-                # itos_list = []
-                # for i in gen_mol:
-                #     if int(i) > 92:
-                #         itos_list += itos[92]
-                #     else:
-                #         itos_list += itos[int(i)]
+                if 93 in gen_mol:
+                    continue
                 print(gen_mol)
                 completion = ''.join([itos[int(i)] for i in gen_mol])
                 completion = completion.replace('<', '')
+                print(completion)
                 # gen_smiles.append(completion)
                 # Jasmine: replace get_mol with Chem.MolFromSmiles
                 mol = Chem.MolFromSmiles(completion)
