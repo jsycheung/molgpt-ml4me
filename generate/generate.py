@@ -113,7 +113,7 @@ if __name__ == '__main__':
     content = ' '.join(smiles + scaf)
     chars = sorted(list(set(regex.findall(content))))
     stoi = {ch: i for i, ch in enumerate(chars)}
-    with open(f'{args.data_name}_stoi.json', 'w') as f:
+    with open(f'{args.data_name}_stoi.json', 'w+') as f:
         json.dump(stoi, f)
     stoi = json.load(open(f'{args.data_name}_stoi.json', 'r'))
 
