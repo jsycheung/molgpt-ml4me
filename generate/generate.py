@@ -133,9 +133,9 @@ if __name__ == '__main__':
                       lstm=args.lstm, lstm_layers=args.lstm_layers)
     model = GPT(mconf)
 
-    # Jasmine: change load path, add strict=False
+    # Jasmine: change load path
     model.load_state_dict(torch.load(
-        './weights/' + args.model_weight, strict=False))
+        './weights/' + args.model_weight))
     model.to('cuda')
     print('Model loaded')
 
