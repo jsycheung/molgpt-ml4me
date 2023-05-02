@@ -211,7 +211,8 @@ if __name__ == '__main__':
                 completion = ''.join([itos[int(i)] for i in gen_mol])
                 completion = completion.replace('<', '')
                 # gen_smiles.append(completion)
-                mol = get_mol(completion)
+                # Jasmine: replace get_mol with Chem.MolFromSmiles
+                mol = Chem.MolFromSmiles(completion)
                 if mol:
                     molecules.append(mol)
 
