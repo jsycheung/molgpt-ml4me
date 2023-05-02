@@ -3,11 +3,13 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from moses.utils import get_mol
+# Jasmine: removed get_mol
+# from moses.utils import get_mol
 from rdkit import Chem
-   
+
 import numpy as np
 import threading
+
 
 def set_seed(seed):
     random.seed(seed)
@@ -15,26 +17,30 @@ def set_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
+
 def top_k_logits(logits, k):
     v, ix = torch.topk(logits, k)
     out = logits.clone()
     out[out < v[:, [-1]]] = -float('Inf')
     return out
 
+
 @torch.no_grad()
-def sample(model, x, steps, temperature=1.0, sample=False, top_k=None, prop = None, scaffold = None):
+def sample(model, x, steps, temperature=1.0, sample=False, top_k=None, prop=None, scaffold=None):
     """
     take a conditioning sequence of indices in x (of shape (b,t)) and predict the next token in
     the sequence, feeding the predictions back into the model each time. Clearly the sampling
     has quadratic complexity unlike an RNN that is only linear, and has a finite context window
     of block_size, unlike an RNN that has an infinite context window.
     """
-    block_size = model.get_block_size()   
+    block_size = model.get_block_size()
     model.eval()
 
     for k in range(steps):
-        x_cond = x if x.size(1) <= block_size else x[:, -block_size:] # crop context if needed
-        logits, _, _ = model(x_cond, prop = prop, scaffold = scaffold)   # for liggpt
+        # crop context if needed
+        x_cond = x if x.size(1) <= block_size else x[:, -block_size:]
+        logits, _, _ = model(
+            x_cond, prop=prop, scaffold=scaffold)   # for liggpt
         # logits, _, _ = model(x_cond)   # for char_rnn
         # pluck the logits at the final step and scale by temperature
         logits = logits[:, -1, :] / temperature
@@ -53,7 +59,8 @@ def sample(model, x, steps, temperature=1.0, sample=False, top_k=None, prop = No
 
     return x
 
-def check_novelty(gen_smiles, train_smiles): # gen: say 788, train: 120803
+
+def check_novelty(gen_smiles, train_smiles):  # gen: say 788, train: 120803
     if len(gen_smiles) == 0:
         novel_ratio = 0.
     else:
@@ -63,13 +70,15 @@ def check_novelty(gen_smiles, train_smiles): # gen: say 788, train: 120803
     print("novelty: {:.3f}%".format(novel_ratio))
     return novel_ratio
 
-def canonic_smiles(smiles_or_mol):
-    mol = get_mol(smiles_or_mol)
-    if mol is None:
-        return None
-    return Chem.MolToSmiles(mol)
+# Jasmine: commented out canonic_smiles
+# def canonic_smiles(smiles_or_mol):
+#     mol = get_mol(smiles_or_mol)
+#     if mol is None:
+#         return None
+#     return Chem.MolToSmiles(mol)
 
-    #Experimental Class for Smiles Enumeration, Iterator and SmilesIterator adapted from Keras 1.2.2
+    # Experimental Class for Smiles Enumeration, Iterator and SmilesIterator adapted from Keras 1.2.2
+
 
 class Iterator(object):
     """Abstract base class for data iterators.
@@ -89,7 +98,8 @@ class Iterator(object):
         self.lock = threading.Lock()
         self.index_generator = self._flow_index(n, batch_size, shuffle, seed)
         if n < batch_size:
-            raise ValueError('Input data length is shorter than batch_size\nAdjust batch_size')
+            raise ValueError(
+                'Input data length is shorter than batch_size\nAdjust batch_size')
 
     def reset(self):
         self.batch_index = 0
@@ -125,8 +135,6 @@ class Iterator(object):
         return self.next(*args, **kwargs)
 
 
-
-
 class SmilesIterator(Iterator):
     """Iterator yielding data from a SMILES array.
     # Arguments
@@ -158,7 +166,8 @@ class SmilesIterator(Iterator):
             self.y = None
         self.smiles_data_generator = smiles_data_generator
         self.dtype = dtype
-        super(SmilesIterator, self).__init__(x.shape[0], batch_size, shuffle, seed)
+        super(SmilesIterator, self).__init__(
+            x.shape[0], batch_size, shuffle, seed)
 
     def next(self):
         """For python 2.x.
@@ -168,10 +177,12 @@ class SmilesIterator(Iterator):
         # Keeps under lock only the mechanism which advances
         # the indexing of each batch.
         with self.lock:
-            index_array, current_index, current_batch_size = next(self.index_generator)
+            index_array, current_index, current_batch_size = next(
+                self.index_generator)
         # The transformation of images is not under thread lock
         # so it can be done in parallel
-        batch_x = np.zeros(tuple([current_batch_size] + [ self.smiles_data_generator.pad, self.smiles_data_generator._charlen]), dtype=self.dtype)
+        batch_x = np.zeros(tuple([current_batch_size] + [self.smiles_data_generator.pad,
+                           self.smiles_data_generator._charlen]), dtype=self.dtype)
         for i, j in enumerate(index_array):
             smiles = self.x[j:j+1]
             x = self.smiles_data_generator.transform(smiles)
@@ -185,7 +196,7 @@ class SmilesIterator(Iterator):
 
 class SmilesEnumerator(object):
     """SMILES Enumerator, vectorizer and devectorizer
-    
+
     #Arguments
         charset: string containing the characters for the vectorization
           can also be generated via the .fit() method
@@ -195,7 +206,8 @@ class SmilesEnumerator(object):
         enum: Enumerate the SMILES during transform
         canonical: use canonical SMILES during transform (overrides enum)
     """
-    def __init__(self, charset = '@C)(=cOn1S2/H[N]\\', pad=120, leftpad=True, isomericSmiles=True, enum=True, canonical=False):
+
+    def __init__(self, charset='@C)(=cOn1S2/H[N]\\', pad=120, leftpad=True, isomericSmiles=True, enum=True, canonical=False):
         self._charset = None
         self.charset = charset
         self.pad = pad
@@ -207,17 +219,17 @@ class SmilesEnumerator(object):
     @property
     def charset(self):
         return self._charset
-        
+
     @charset.setter
     def charset(self, charset):
         self._charset = charset
         self._charlen = len(charset)
-        self._char_to_int = dict((c,i) for i,c in enumerate(charset))
-        self._int_to_char = dict((i,c) for i,c in enumerate(charset))
-        
-    def fit(self, smiles, extra_chars=[], extra_pad = 5):
+        self._char_to_int = dict((c, i) for i, c in enumerate(charset))
+        self._int_to_char = dict((i, c) for i, c in enumerate(charset))
+
+    def fit(self, smiles, extra_chars=[], extra_pad=5):
         """Performs extraction of the charset and length of a SMILES datasets and sets self.pad and self.charset
-        
+
         #Arguments
             smiles: Numpy array or Pandas series containing smiles as strings
             extra_chars: List of extra chars to add to the charset (e.g. "\\\\" when "/" is present)
@@ -226,14 +238,14 @@ class SmilesEnumerator(object):
         charset = set("".join(list(smiles)))
         self.charset = "".join(charset.union(set(extra_chars)))
         self.pad = max([len(smile) for smile in smiles]) + extra_pad
-        
+
     def randomize_smiles(self, smiles):
         """Perform a randomization of a SMILES string
         must be RDKit sanitizable"""
         m = Chem.MolFromSmiles(smiles)
         ans = list(range(m.GetNumAtoms()))
         np.random.shuffle(ans)
-        nm = Chem.RenumberAtoms(m,ans)
+        nm = Chem.RenumberAtoms(m, ans)
         return Chem.MolToSmiles(nm, canonical=self.canonical, isomericSmiles=self.isomericSmiles)
 
     def transform(self, smiles):
@@ -241,35 +253,37 @@ class SmilesEnumerator(object):
         #Arguments
             smiles: Numpy array or Pandas series containing smiles as strings
         """
-        one_hot =  np.zeros((smiles.shape[0], self.pad, self._charlen),dtype=np.int8)
-        
+        one_hot = np.zeros(
+            (smiles.shape[0], self.pad, self._charlen), dtype=np.int8)
+
         if self.leftpad:
-            for i,ss in enumerate(smiles):
-                if self.enumerate: ss = self.randomize_smiles(ss)
+            for i, ss in enumerate(smiles):
+                if self.enumerate:
+                    ss = self.randomize_smiles(ss)
                 l = len(ss)
                 diff = self.pad - l
-                for j,c in enumerate(ss):
-                    one_hot[i,j+diff,self._char_to_int[c]] = 1
+                for j, c in enumerate(ss):
+                    one_hot[i, j+diff, self._char_to_int[c]] = 1
             return one_hot
         else:
-            for i,ss in enumerate(smiles):
-                if self.enumerate: ss = self.randomize_smiles(ss)
-                for j,c in enumerate(ss):
-                    one_hot[i,j,self._char_to_int[c]] = 1
+            for i, ss in enumerate(smiles):
+                if self.enumerate:
+                    ss = self.randomize_smiles(ss)
+                for j, c in enumerate(ss):
+                    one_hot[i, j, self._char_to_int[c]] = 1
             return one_hot
 
-      
     def reverse_transform(self, vect):
         """ Performs a conversion of a vectorized SMILES to a smiles strings
         charset must be the same as used for vectorization.
         #Arguments
             vect: Numpy array of vectorized SMILES.
-        """       
+        """
         smiles = []
         for v in vect:
-            #mask v 
-            v=v[v.sum(axis=1)==1]
-            #Find one hot encoded index with argmax, translate to char and join to string
+            # mask v
+            v = v[v.sum(axis=1) == 1]
+            # Find one hot encoded index with argmax, translate to char and join to string
             smile = "".join(self._int_to_char[i] for i in v.argmax(axis=1))
             smiles.append(smile)
         return np.array(smiles)

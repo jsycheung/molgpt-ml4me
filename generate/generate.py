@@ -1,5 +1,5 @@
 from rdkit.Chem.rdMolDescriptors import CalcTPSA
-from utils import check_novelty, sample, canonic_smiles
+from utils import check_novelty, sample  # Jasmine: remove canonic_smiles
 from dataset import SmileDataset
 from rdkit.Chem import QED
 from rdkit.Chem import Crippen
@@ -14,7 +14,8 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from moses.utils import get_mol
+# Jasmine: don't need get_mol because Chem.MolToSmiles will generate canonical smies anyway
+# from moses.utils import get_mol
 import re
 import moses
 import json
@@ -230,7 +231,8 @@ if __name__ == '__main__':
         # with open(f'gen_csv/moses_metrics_7_top10.json', 'w') as file:
         #       json.dump(metrics, file)
 
-        canon_smiles = [canonic_smiles(s) for s in results['smiles']]
+        # Jasmine: rewrote canon_smiles to disregard the canonic_smiles function
+        canon_smiles = [s for s in results['smiles']]
         unique_smiles = list(set(canon_smiles))
         if 'moses' in args.data_name:
             # replace 'source' with 'split' for moses
