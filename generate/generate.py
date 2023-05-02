@@ -1,5 +1,4 @@
 from rdkit.Chem.rdMolDescriptors import CalcTPSA
-import sascorer
 from utils import check_novelty, sample, canonic_smiles
 from dataset import SmileDataset
 from rdkit.Chem import QED
@@ -20,11 +19,10 @@ import re
 import moses
 import json
 from rdkit.Chem import RDConfig
-
 import os
 import sys
 sys.path.append(os.path.join(RDConfig.RDContribDir, 'SA_Score'))
-
+import sascorer  # nopep8
 
 # python generate.py --model_weight guacamol_nocond_new.pt --data_name guacamol2 --csv_name guacamol_temp1_nocond_30k --gen_size 1000 --vocab_size 94 --block_size 100
 
